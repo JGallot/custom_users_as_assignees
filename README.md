@@ -1,8 +1,7 @@
 # Expand Custom Users as Assignees plugin for Multiple Assignees
-[日本語](README_Ja.md)
 
 Redmine plugin for adding assignee functionality includes default query and reminder to **Custom Users**.  
-*) **Custom Users** means the users specified in the **Custom field** of the **User** format
+*) **Custom Users** means the users specified in the **Custom field** of the **User** format AND check box named "Use as assignee" is checked.
 
 This plugin can realize multiple assignees on issues for review tasks by multiple people use case and so on.
   * send email notifications to **Custom Users who are added or removed** on issues, or all **Custom Users** as broadcast when **Custom Users** are not changed on issues, as well as authors and assignees.
@@ -18,29 +17,21 @@ The recommended operation is keeping a ticket manager in the original Assignee s
 
 1. To install the plugin
 
-    `git clone` to `plugins/custom_users_as_assignees` on your Redmine path.
+    `git clone` to `plugins/custom_users_as_assignees` on your Redmine path (or take at tag file, it's better)
 
         $ cd {RAILS_ROOT}/plugins
-        $ git clone https://github.com/preciousplum/custom_users_as_assignees 
+        $ bundle exec rake  redmine:plugins:migrate  RAILS_ENV=production NAME=custom_users_as_assignees
+        $ git clone https://github.com/preciousplum/custom_users_as_assignees
 
 2. Restart Redmine.
 
-    Now you should be able to see the plugin in **Administration > Plugins**.  
-    *) Migration is **not** required. 
+    Now you should be able to see the plugin in **Administration > Plugins**.
+## Utilization 
+* Create a custom Field with a Type *user*
+* 
 
 ## Compatibility
-This plugin version is compatible with Redmine 3.3.0 and later in principle.
-However, this plugin has been tested on Redmine 4.0.3 and 4.2.5 only currently.
+This plugin has been tested on Redmine 5.0.x.
 
 ## Special Thanks
-This plugin was developed based on  notify_custom_users plugin.
-https://github.com/Restream/notify_custom_users
-
-## Screen Images
-Here are the images used with customfield_checkbox_utility plugin.  https://github.com/preciousplum/customfield_checkbox_utility
-
-![Custom Field Setting](assets/images/custom_field_setting.png)  
-![Edit Issue](assets/images/edit_issue.png)  
-![Assigned to me](assets/images/assigned_to_me.png)  
-![Notification](assets/images/notification.png)  
-![Reminder](assets/images/reminder.png)  
+This plugin was initially developed by preciousplum

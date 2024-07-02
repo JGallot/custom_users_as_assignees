@@ -45,7 +45,7 @@ module CustomUsersAsAssignees
       issues.each do |issue|
         assigneeid = issue["assigned_to_id"]
         issue.customized.each do |customizeduser|
-          if customizeduser.custom_field["field_format"] == "user" && customizeduser.value && customizeduser.value != ""
+          if customizeduser.custom_field["field_format"] == "user" && customizeduser.use_as_assignee && customizeduser.value && customizeduser.value != ""
             userid = customizeduser.value.to_i
             if userid != assigneeid
               user = User.find_by_id(userid)

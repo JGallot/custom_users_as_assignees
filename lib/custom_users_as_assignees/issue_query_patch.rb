@@ -56,7 +56,7 @@ module CustomUsersAsAssignees
             " LEFT OUTER JOIN custom_values ON custom_values.customized_id = issues.id AND custom_values.customized_type = 'Issue'" +
             " LEFT OUTER JOIN custom_fields ON custom_fields.id = custom_values.custom_field_id" +
             " WHERE issues.assigned_to_id IN (#{int_values})" +
-            " OR (custom_fields.field_format = 'user' AND custom_values.value IN (#{str_values}) ) )"
+            " OR (custom_fields.field_format = 'user' AND custom_fields.use_as_assignee = true AND custom_values.value IN (#{str_values}) ) )"
         end
       end      
       

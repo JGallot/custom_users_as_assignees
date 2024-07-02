@@ -43,6 +43,7 @@ module CustomUsersAsAssignees
           issues_clause << " AND cv.customized_type = 'Issue'"
           issues_clause << " AND cv.value in (#{user_ids.map{ |e| "'#{e}'" }.join(',')})"
           issues_clause << " WHERE cf.field_format = 'user'"
+          issues_clause << " AND cf.use_as_assignee=true"
           issues_clause << ")"
           issues_clause << " AND (#{prj_clause})" if prj_clause
         end
@@ -55,7 +56,7 @@ module CustomUsersAsAssignees
       # find users selected in custom fields with type 'user'
       def custom_users
         custom_user_values = custom_field_values.select do |v|
-          v.custom_field.field_format == "user"
+          v.custom_field.field_format == "user" && v.custom_field.use_as_assignee
         end
         custom_user_ids = custom_user_values.map(&:value).flatten
         custom_user_ids.reject! { |id| id.blank? }
@@ -89,7 +90,7 @@ module CustomUsersAsAssignees
           journal.details.each do |det|
             if det.property == 'cf'
               custom_field_id = det.prop_key
-              if CustomField.find_by_id(custom_field_id).field_format == 'user'
+              if CustomField.find_by_id(custom_field_id).field_format == 'user' && CustomField.find_by_id(custom_field_id).use_as_assignee
                 custom_user_added_ids <<  det.value if det.value.present?
                 custom_user_removed_ids <<  det.old_value if det.old_value.present?
               end
