@@ -39,27 +39,39 @@ module CustomUsersAsAssignees
 
       # overwrite the procedure for assigned_to_id_field to query all custom users field
       def sql_for_assigned_to_id_field(field, operator, value)
-        targets = value;
-        value.each do |target|
-          begin
-            targets += User.find(target).group_ids.map(&:to_s)
-            targets.uniq!
-          rescue
-          end
-        end
-
-        int_values = targets.to_s.scan(/[+-]?\d+/).map(&:to_i).join(",")
-        str_values = targets.to_s.scan(/[+-]?\d+/).map(&:to_i).map{ |e| "'#{e}'" }.join(",")
-        if int_values.present?
-          subquery = "#{Issue.table_name}.id #{ operator == '=' ? 'IN' : 'NOT IN' } "
+        case operator
+        when "!*" # none
+          Rails.logger.info 'PB ASSIGNATION'
+          subquery = "#{Issue.table_name}.id IN "
           subquery += "(SELECT #{Issue.table_name}.id FROM issues" +
             " LEFT OUTER JOIN custom_values ON custom_values.customized_id = issues.id AND custom_values.customized_type = 'Issue'" +
             " LEFT OUTER JOIN custom_fields ON custom_fields.id = custom_values.custom_field_id" +
-            " WHERE issues.assigned_to_id IN (#{int_values})" +
-            " OR (custom_fields.field_format = 'user' AND custom_fields.use_as_assignee = true AND custom_values.value IN (#{str_values}) ) )"
-        end
-      end      
-      
+            " WHERE issues.assigned_to_id IS NULL" +
+            " AND (custom_fields.field_format = 'user' AND custom_fields.use_as_assignee = true" +
+            " AND custom_fields.use_as_assignee=true AND COALESCE(custom_values.value, '')= '' ) )"
+        else
+          targets = value;
+          value.each do |target|
+            begin
+              targets += User.find(target).group_ids.map(&:to_s)
+              targets.uniq!
+            rescue
+            end
+          end
+            int_values = targets.to_s.scan(/[+-]?\d+/).map(&:to_i).join(",")
+            str_values = targets.to_s.scan(/[+-]?\d+/).map(&:to_i).map{ |e| "'#{e}'" }.join(",")
+            Rails.logger.info "DEBUG ICI : #{int_values.inspect}"
+            Rails.logger.info "DEBUG ICI : #{operator.inspect}"
+            if int_values.present?
+              subquery = "#{Issue.table_name}.id #{ operator == '=' ? 'IN' : 'NOT IN' } "
+              subquery += "(SELECT #{Issue.table_name}.id FROM issues" +
+                " LEFT OUTER JOIN custom_values ON custom_values.customized_id = issues.id AND custom_values.customized_type = 'Issue'" +
+                " LEFT OUTER JOIN custom_fields ON custom_fields.id = custom_values.custom_field_id" +
+                " WHERE issues.assigned_to_id IN (#{int_values})" +
+                " OR (custom_fields.field_format = 'user' AND custom_fields.use_as_assignee = true AND custom_fields.use_as_assignee=true AND custom_values.value IN (#{str_values}) ) )"
+            end
+          end
+      end
     end # InstanceMethods
   end
 end
