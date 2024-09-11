@@ -43,13 +43,23 @@ module CustomUsersAsAssignees
         when "!*" # none
           Rails.logger.info 'PB ASSIGNATION'
           subquery = "#{Issue.table_name}.id IN "
-          subquery += "(SELECT #{Issue.table_name}.id FROM issues" +
-            " LEFT OUTER JOIN custom_values ON custom_values.customized_id = issues.id AND custom_values.customized_type = 'Issue'" +
-            " LEFT OUTER JOIN custom_fields ON custom_fields.id = custom_values.custom_field_id" +
-            " WHERE issues.assigned_to_id IS NULL" +
-            " AND (custom_fields.field_format = 'user' AND custom_fields.use_as_assignee = true" +
-            " AND custom_fields.use_as_assignee=true AND COALESCE(custom_values.value, '')= '' ) )"
-        else
+          subquery += "(SELECT #{Issue.table_name}.id FROM #{Issue.table_name}" +
+            " LEFT JOIN custom_fields_projects on custom_fields_projects.project_id  = #{Issue.table_name}.project_id " +
+            " LEFT OUTER JOIN #{CustomValue.table_name} ON #{CustomValue.table_name}.customized_id = issues.id AND custom_values.customized_type = 'Issue'" +
+            " LEFT OUTER JOIN #{CustomField.table_name} ON #{CustomField.table_name}.id = #{CustomValue.table_name}.custom_field_id" +
+            " WHERE (#{Issue.table_name}.assigned_to_id IS null AND issues.id NOT IN "+
+              "(SELECT i.id FROM #{Issue.table_name} i"+
+                " JOIN custom_fields_projects cfp ON cfp.project_id=i.project_id "+
+                " JOIN #{CustomField.table_name} cf ON cfp.custom_field_id=cf.id WHERE cf.use_as_assignee=true )"+
+                ") "+
+            " OR (#{Issue.table_name}.assigned_to_id IS null AND #{Issue.table_name}.id IN "+
+              " (SELECT i.id FROM #{Issue.table_name} i "+
+                " JOIN custom_fields_projects cfp ON cfp.project_id=i.project_id"+
+                " JOIN #{CustomField.table_name} cf ON cfp.custom_field_id=cf.id AND cf.use_as_assignee=true AND cf.field_format = 'user'"+
+                " LEFT OUTER JOIN #{CustomValue.table_name} cv ON cv.customized_id = i.id AND cv.customized_type = 'Issue' AND cv.custom_field_id=cfp.custom_field_id"+
+                " WHERE (COALESCE(cv.value, '')= '' OR cv.value is null) )"+
+              "))"
+          else
           targets = value;
           value.each do |target|
             begin

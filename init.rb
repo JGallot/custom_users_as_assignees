@@ -23,7 +23,7 @@ Redmine::Plugin.register :custom_users_as_assignees do
   name 'Expand Custom Users as Assignees plugin'
   author 'Jérôme GALLOT'
   description 'Redmine plugin for adding assignee functionality includes default query and reminder to custom users'
-  version '0.2'
+  version '0.3'
   url 'https://github.com/JGallot/custom_users_as_assignees'
   author_url 'https://github.com/JGallot/'
 end
