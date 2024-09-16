@@ -48,7 +48,11 @@ module CustomUsersAsAssignees
           issues_clause << " AND (#{prj_clause})" if prj_clause
         end
 
-        "( #{visible_condition_without_custom_users(user, options)} OR (#{issues_clause})) "
+        if issues_clause.nil? || issues_clause.empty?
+          "( #{visible_condition_without_custom_users(user, options)} ) "
+        else
+          "( #{visible_condition_without_custom_users(user, options)} OR (#{issues_clause})) "
+        end
       end
     end
 
